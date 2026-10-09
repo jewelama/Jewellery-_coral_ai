@@ -1,1 +1,237 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Coral AI Jewellery Designer</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#20232b;color:#fff}
+header{padding:14px;background:#15171d;border-bottom:1px solid #444}
+header h2{margin:0;font-size:20px}
+header p{margin:6px 0 0;color:#bbb;font-size:12px}
+.toolbar{display:flex;flex-wrap:wrap;gap:7px;padding:10px;background:#292d37}
+button,select,input{padding:10px;border:1px solid #555;border-radius:7px;background:#373c48;color:white;font-size:13px}
+button.active{background:#b77a50;border-color:#f2c49b}
+button:active{opacity:.7}
+.options{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px;background:#222630}
+.options label{font-size:12px;color:#ddd}
+.options input[type=color]{width:38px;height:35px;padding:2px}
+.options input[type=range]{width:85px;padding:0}
+#board{height:62vh;min-height:300px;background:white;overflow:hidden;touch-action:none}
+#drawing{width:100%;height:100%;display:block;background:white}
+footer{padding:12px;color:#bbb;font-size:12px;text-align:center}
+</style>
+</head>
+<body>
+<header>
+<h2>✦ CORAL AI Jewellery Designer</h2>
+<p>Jewellery vector drawing studio • Mobile V1</p>
+</header>
+
+<div class="toolbar">
+<button class="active" data-tool="select">Select</button>
+<button data-tool="ellipse">Circle / Oval</button>
+<button data-tool="line">Line</button>
+<button data-tool="stone">Diamond Stone</button>
+<button data-tool="bangle">Bangle</button>
+<button data-tool="text">Text</button>
+<button id="undo">Undo</button>
+<button id="grid">Grid: ON</button>
+<button id="clear">Clear</button>
+<button id="save">Export SVG</button>
+</div>
+
+<div class="options">
+<label>Color <input id="color" type="color" value="#bd8053"></label>
+<label>Line <input id="width" type="range" min="1" max="12" value="2"></label>
+<label>Stone size
+<select id="size">
+<option value="4">Small</option>
+<option value="7" selected>Medium</option>
+<option value="11">Large</option>
+</select>
+</label>
+</div>
+
+<div id="board">
+<svg id="drawing" viewBox="0 0 800 600"
+xmlns="http://www.w3.org/2000/svg">
+<defs>
+<pattern id="gridpattern" width="20" height="20"
+patternUnits="userSpaceOnUse">
+<path d="M20 0H0V20" fill="none"
+stroke="#e7e7e7" stroke-width=".7"/>
+</pattern>
+</defs>
+<rect id="gridbg" width="800" height="600"
+fill="url(#gridpattern)"/>
+<g id="art"></g>
+</svg>
+</div>
+
+<footer>
+Choose a tool, then drag on the white canvas.
+Select an object and tap Undo to remove your latest drawing.
+</footer>
+
+<script>
+const svg=document.getElementById('drawing');
+const art=document.getElementById('art');
+const gridbg=document.getElementById('gridbg');
+let tool='select',start=null,temp=null,grid=true;
+const history=[];
+
+function snapshot(){
+ history.push(art.innerHTML);
+ if(history.length>100)history.shift();
+}
+function point(e){
+ const r=svg.getBoundingClientRect();
+ return {
+ x:(e.clientX-r.left)*800/r.width,
+ y:(e.clientY-r.top)*600/r.height
+ };
+}
+function el(tag,attrs){
+ const n=document.createElementNS(
+ 'http://www.w3.org/2000/svg',tag);
+ for(const k in attrs)n.setAttribute(k,attrs[k]);
+ return n;
+}
+function style(){
+ return {
+ stroke:document.getElementById('color').value,
+ 'stroke-width':document.getElementById('width').value,
+ fill:'none',
+ 'stroke-linecap':'round',
+ 'stroke-linejoin':'round'
+ };
+}
+function add(tag,attrs){
+ const n=el(tag,{...style(),...attrs});
+ art.appendChild(n);
+ return n;
+}
+function stone(x,y){
+ const s=Number(document.getElementById('size').value);
+ add('polygon',{
+ points:`${x},${y-s*1.5} ${x+s},${y}
+ ${x},${y+s*1.5} ${x-s},${y}`,
+ fill:'#d9f5ff',stroke:'#7094ad',
+ 'stroke-width':1.5
+ });
+ add('line',{
+ x1:x-s*.55,y1:y-s*.8,
+ x2:x+s*.55,y2:y+s*.8,
+ stroke:'#ffffff','stroke-width':1
+ });
+}
+document.querySelectorAll('[data-tool]').forEach(b=>{
+ b.addEventListener('click',()=>{
+  tool=b.dataset.tool;
+  document.querySelectorAll('[data-tool]').forEach(x=>
+   x.classList.toggle('active',x===b));
+ });
+});
+
+svg.addEventListener('pointerdown',e=>{
+ if(e.target.closest('#gridbg')){}
+ start=point(e);
+ if(tool==='select'){
+  const target=e.target.closest('[data-object]');
+  if(target){
+   snapshot();
+   const old=target.getAttribute('opacity');
+   target.setAttribute('opacity',old==='0.5'?'1':'0.5');
+  }
+  return;
+ }
+ if(tool==='text'){
+  const t=prompt('Enter jewellery label:','Diamond');
+  if(t){
+   snapshot();
+   const n=add('text',{
+    x:start.x,y:start.y,fill:document.getElementById('color').value,
+    stroke:'none','font-size':22
+   });
+   n.textContent=t;
+  }
+  return;
+ }
+ if(tool==='stone'){
+  snapshot();stone(start.x,start.y);return;
+ }
+ if(tool==='bangle'){
+  snapshot();
+  add('ellipse',{cx:start.x,cy:start.y,rx:115,ry:80});
+  add('ellipse',{cx:start.x,cy:start.y,rx:96,ry:62});
+  for(let i=0;i<24;i++){
+   const a=i*Math.PI*2/24;
+   stone(start.x+105*Math.cos(a),start.y+72*Math.sin(a));
+  }
+  return;
+ }
+ if(tool==='ellipse'){
+  snapshot();
+  temp=add('ellipse',{cx:start.x,cy:start.y,rx:0,ry:0});
+ }else if(tool==='line'){
+  snapshot();
+  temp=add('line',{
+   x1:start.x,y1:start.y,x2:start.x,y2:start.y
+  });
+ }
+ svg.setPointerCapture(e.pointerId);
+});
+
+svg.addEventListener('pointermove',e=>{
+ if(!start||!temp||tool==='select')return;
+ const p=point(e);
+ if(tool==='ellipse'){
+  temp.setAttribute('cx',(start.x+p.x)/2);
+  temp.setAttribute('cy',(start.y+p.y)/2);
+  temp.setAttribute('rx',Math.abs(p.x-start.x)/2);
+  temp.setAttribute('ry',Math.abs(p.y-start.y)/2);
+ }else if(tool==='line'){
+  temp.setAttribute('x2',p.x);
+  temp.setAttribute('y2',p.y);
+ }
+});
+svg.addEventListener('pointerup',()=>{
+ start=null;temp=null;
+});
+
+document.getElementById('undo').onclick=()=>{
+ if(history.length){
+  art.innerHTML=history.pop();
+ }
+};
+document.getElementById('clear').onclick=()=>{
+ if(confirm('Clear your whole design?')){
+  snapshot();art.innerHTML='';
+ }
+};
+document.getElementById('grid').onclick=()=>{
+ grid=!grid;
+ gridbg.setAttribute('opacity',grid?'1':'0');
+ document.getElementById('grid').textContent=
+ grid?'Grid: ON':'Grid: OFF';
+};
+document.getElementById('save').onclick=()=>{
+ const clone=svg.cloneNode(true);
+ clone.setAttribute('xmlns','http://www.w3.org/2000/svg');
+ const bg=clone.querySelector('#gridbg');
+ if(bg)bg.remove();
+ const xml=new XMLSerializer().serializeToString(clone);
+ const blob=new Blob([xml],{type:'image/svg+xml;charset=utf-8'});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement('a');
+ a.href=url;a.download='Coral-Jewellery-Design.svg';
+ a.click();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+};
+</script>
+</body>
+  </html>
+  
