@@ -4,234 +4,155 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Coral AI Jewellery Designer</title>
+<title>Jewellery Coral AI</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#20232b;color:#fff}
-header{padding:14px;background:#15171d;border-bottom:1px solid #444}
-header h2{margin:0;font-size:20px}
-header p{margin:6px 0 0;color:#bbb;font-size:12px}
-.toolbar{display:flex;flex-wrap:wrap;gap:7px;padding:10px;background:#292d37}
-button,select,input{padding:10px;border:1px solid #555;border-radius:7px;background:#373c48;color:white;font-size:13px}
-button.active{background:#b77a50;border-color:#f2c49b}
-button:active{opacity:.7}
-.options{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px;background:#222630}
-.options label{font-size:12px;color:#ddd}
-.options input[type=color]{width:38px;height:35px;padding:2px}
-.options input[type=range]{width:85px;padding:0}
-#board{height:62vh;min-height:300px;background:white;overflow:hidden;touch-action:none}
-#drawing{width:100%;height:100%;display:block;background:white}
-footer{padding:12px;color:#bbb;font-size:12px;text-align:center}
+body{margin:0;background:#10131a;color:#f4f4f5;font-family:Arial,sans-serif}
+header{padding:18px;background:#202631;text-align:center;border-bottom:2px solid #c9a66b}
+h1{font-size:24px;margin:0;color:#f2ce8b}
+header p{margin:8px 0 0;color:#c8ced8}
+main{padding:14px;max-width:950px;margin:auto}
+.panel{background:#1b202a;padding:15px;border-radius:14px;margin-bottom:14px;border:1px solid #343c49}
+h2{font-size:18px;margin:0 0 13px}
+.row{display:flex;flex-wrap:wrap;gap:9px;margin:10px 0}
+button,.upload{border:0;border-radius:9px;padding:12px 14px;background:#bd9556;color:#111;font-weight:bold;font-size:14px;cursor:pointer}
+button.secondary{background:#303948;color:white}
+input[type=file]{max-width:100%;color:white}
+input[type=number],input[type=text]{padding:10px;border-radius:7px;border:1px solid #596272;background:#10131a;color:white;max-width:100%;width:100%}
+label{font-size:13px;color:#cbd0d8;display:block;margin:9px 0}
+#stage{background:#f8f8f5;border-radius:10px;min-height:260px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+#art{max-width:100%;max-height:65vh;display:block}
+#hint{color:#555;text-align:center;padding:35px}
+.small{font-size:12px;color:#adb5c2;line-height:1.5}
+#status{color:#f2ce8b;font-size:13px}
 </style>
 </head>
 <body>
 <header>
-<h2>✦ CORAL AI Jewellery Designer</h2>
-<p>Jewellery vector drawing studio • Mobile V1</p>
+<h1>✦ Jewellery Coral AI ✦</h1>
+<p>Jewellery Design Helper • CorelDRAW Workflow</p>
 </header>
-
-<div class="toolbar">
-<button class="active" data-tool="select">Select</button>
-<button data-tool="ellipse">Circle / Oval</button>
-<button data-tool="line">Line</button>
-<button data-tool="stone">Diamond Stone</button>
-<button data-tool="bangle">Bangle</button>
-<button data-tool="text">Text</button>
-<button id="undo">Undo</button>
-<button id="grid">Grid: ON</button>
-<button id="clear">Clear</button>
-<button id="save">Export SVG</button>
+<main>
+<section class="panel">
+<h2>STEP 1 — Upload Design</h2>
+<input id="file" type="file" accept="image/*">
+<div class="row">
+<button class="secondary" onclick="rotate(-90)">↶ Rotate</button>
+<button class="secondary" onclick="rotate(90)">↷ Rotate</button>
+<button class="secondary" onclick="resetImage()">Reset</button>
 </div>
+<p class="small">अपनी jewellery की फोटो या sketch चुनें। बेहतर नतीजे के लिए साफ फोटो इस्तेमाल करें।</p>
+</section>
 
-<div class="options">
-<label>Color <input id="color" type="color" value="#bd8053"></label>
-<label>Line <input id="width" type="range" min="1" max="12" value="2"></label>
-<label>Stone size
-<select id="size">
-<option value="4">Small</option>
-<option value="7" selected>Medium</option>
-<option value="11">Large</option>
-</select>
-</label>
+<section class="panel">
+<h2>STEP 2 — Sketch Tools</h2>
+<div class="row">
+<button onclick="filter('original')">Original</button>
+<button onclick="filter('gray')">Black & White</button>
+<button onclick="filter('contrast')">Sharp Contrast</button>
+<button onclick="filter('invert')">Invert</button>
 </div>
+<label>Brightness <input id="bright" type="range" min="50" max="160" value="100" oninput="draw()"></label>
+<label>Contrast <input id="cont" type="range" min="50" max="220" value="100" oninput="draw()"></label>
+</section>
 
-<div id="board">
-<svg id="drawing" viewBox="0 0 800 600"
-xmlns="http://www.w3.org/2000/svg">
-<defs>
-<pattern id="gridpattern" width="20" height="20"
-patternUnits="userSpaceOnUse">
-<path d="M20 0H0V20" fill="none"
-stroke="#e7e7e7" stroke-width=".7"/>
-</pattern>
-</defs>
-<rect id="gridbg" width="800" height="600"
-fill="url(#gridpattern)"/>
-<g id="art"></g>
-</svg>
+<section class="panel">
+<h2>STEP 3 — Measurements</h2>
+<label>Measurement text (उदाहरण: Width 25 mm)
+<input id="measure" type="text" value="Width 25 mm"></label>
+<div class="row">
+<button onclick="addMeasure()">Add Measurement</button>
+<button class="secondary" onclick="clearMeasure()">Clear Measurement</button>
 </div>
+<p class="small">Measurement text केवल annotation है; फोटो के scale से स्वतः वास्तविक माप नहीं निकलता।</p>
+</section>
 
-<footer>
-Choose a tool, then drag on the white canvas.
-Select an object and tap Undo to remove your latest drawing.
-</footer>
+<section class="panel">
+<h2>Design Preview</h2>
+<div id="stage">
+<div id="hint">Upload a jewellery image to start</div>
+<canvas id="art" hidden></canvas>
+</div>
+<p id="status">Ready — upload your design.</p>
+</section>
 
+<section class="panel">
+<h2>STEP 4 — Export for CorelDRAW</h2>
+<div class="row">
+<button onclick="savePNG()">Download PNG</button>
+<button onclick="saveSVG()">Download SVG</button>
+</div>
+<p class="small">PNG एक raster image है। SVG में यह preview image embedded होगी; यह अपने-आप असली editable vector curves नहीं बनाती। SVG को CorelDRAW में import करके आगे काम करें।</p>
+</section>
+</main>
 <script>
-const svg=document.getElementById('drawing');
-const art=document.getElementById('art');
-const gridbg=document.getElementById('gridbg');
-let tool='select',start=null,temp=null,grid=true;
-const history=[];
-
-function snapshot(){
- history.push(art.innerHTML);
- if(history.length>100)history.shift();
+const canvas=document.getElementById('art');
+const ctx=canvas.getContext('2d');
+let source=null,rotation=0,mode='original',measurement='';
+function draw(){
+ if(!source)return;
+ const max=1000,scale=Math.min(1,max/source.width,max/source.height);
+ const w=Math.max(1,Math.round(source.width*scale));
+ const h=Math.max(1,Math.round(source.height*scale));
+ const sideways=Math.abs(rotation%180)===90;
+ canvas.width=sideways?h:w;canvas.height=sideways?w:h;
+ ctx.save();ctx.translate(canvas.width/2,canvas.height/2);
+ ctx.rotate(rotation*Math.PI/180);
+ ctx.drawImage(source,-w/2,-h/2,w,h);ctx.restore();
+ const image=ctx.getImageData(0,0,canvas.width,canvas.height);
+ const d=image.data,brightness=+document.getElementById('bright').value;
+ const contrast=+document.getElementById('cont').value/100;
+ for(let i=0;i<d.length;i+=4){
+  let r=d[i],g=d[i+1],b=d[i+2];
+  if(mode==='gray'||mode==='contrast'){
+   let y=.299*r+.587*g+.114*b;
+   if(mode==='contrast')y=y<155?0:255;
+   r=g=b=y;
+  }else if(mode==='invert'){r=255-r;g=255-g;b=255-b}
+  d[i]=Math.max(0,Math.min(255,((r-128)*contrast+128)*brightness/100));
+  d[i+1]=Math.max(0,Math.min(255,((g-128)*contrast+128)*brightness/100));
+  d[i+2]=Math.max(0,Math.min(255,((b-128)*contrast+128)*brightness/100));
+ }
+ ctx.putImageData(image,0,0);
+ if(measurement){
+  ctx.save();ctx.font='bold 20px Arial';
+  const pad=9,tw=ctx.measureText(measurement).width;
+  ctx.fillStyle='rgba(255,255,255,.88)';
+  ctx.fillRect(8,8,tw+pad*2,36);
+  ctx.fillStyle='#b17a25';ctx.fillText(measurement,8+pad,33);
+  ctx.restore();
+ }
+ canvas.hidden=false;document.getElementById('hint').hidden=true;
 }
-function point(e){
- const r=svg.getBoundingClientRect();
- return {
- x:(e.clientX-r.left)*800/r.width,
- y:(e.clientY-r.top)*600/r.height
+document.getElementById('file').addEventListener('change',e=>{
+ const f=e.target.files[0];if(!f)return;
+ if(!f.type.startsWith('image/')){alert('Please select an image.');return}
+ const reader=new FileReader();
+ reader.onload=()=>{
+  const img=new Image();
+  img.onload=()=>{source=img;rotation=0;mode='original';measurement='';draw();document.getElementById('status').textContent='Image loaded successfully.'};
+  img.onerror=()=>alert('Image could not be opened.');
+  img.src=reader.result;
  };
-}
-function el(tag,attrs){
- const n=document.createElementNS(
- 'http://www.w3.org/2000/svg',tag);
- for(const k in attrs)n.setAttribute(k,attrs[k]);
- return n;
-}
-function style(){
- return {
- stroke:document.getElementById('color').value,
- 'stroke-width':document.getElementById('width').value,
- fill:'none',
- 'stroke-linecap':'round',
- 'stroke-linejoin':'round'
- };
-}
-function add(tag,attrs){
- const n=el(tag,{...style(),...attrs});
- art.appendChild(n);
- return n;
-}
-function stone(x,y){
- const s=Number(document.getElementById('size').value);
- add('polygon',{
- points:`${x},${y-s*1.5} ${x+s},${y}
- ${x},${y+s*1.5} ${x-s},${y}`,
- fill:'#d9f5ff',stroke:'#7094ad',
- 'stroke-width':1.5
- });
- add('line',{
- x1:x-s*.55,y1:y-s*.8,
- x2:x+s*.55,y2:y+s*.8,
- stroke:'#ffffff','stroke-width':1
- });
-}
-document.querySelectorAll('[data-tool]').forEach(b=>{
- b.addEventListener('click',()=>{
-  tool=b.dataset.tool;
-  document.querySelectorAll('[data-tool]').forEach(x=>
-   x.classList.toggle('active',x===b));
- });
+ reader.readAsDataURL(f);
 });
-
-svg.addEventListener('pointerdown',e=>{
- if(e.target.closest('#gridbg')){}
- start=point(e);
- if(tool==='select'){
-  const target=e.target.closest('[data-object]');
-  if(target){
-   snapshot();
-   const old=target.getAttribute('opacity');
-   target.setAttribute('opacity',old==='0.5'?'1':'0.5');
-  }
-  return;
- }
- if(tool==='text'){
-  const t=prompt('Enter jewellery label:','Diamond');
-  if(t){
-   snapshot();
-   const n=add('text',{
-    x:start.x,y:start.y,fill:document.getElementById('color').value,
-    stroke:'none','font-size':22
-   });
-   n.textContent=t;
-  }
-  return;
- }
- if(tool==='stone'){
-  snapshot();stone(start.x,start.y);return;
- }
- if(tool==='bangle'){
-  snapshot();
-  add('ellipse',{cx:start.x,cy:start.y,rx:115,ry:80});
-  add('ellipse',{cx:start.x,cy:start.y,rx:96,ry:62});
-  for(let i=0;i<24;i++){
-   const a=i*Math.PI*2/24;
-   stone(start.x+105*Math.cos(a),start.y+72*Math.sin(a));
-  }
-  return;
- }
- if(tool==='ellipse'){
-  snapshot();
-  temp=add('ellipse',{cx:start.x,cy:start.y,rx:0,ry:0});
- }else if(tool==='line'){
-  snapshot();
-  temp=add('line',{
-   x1:start.x,y1:start.y,x2:start.x,y2:start.y
-  });
- }
- svg.setPointerCapture(e.pointerId);
-});
-
-svg.addEventListener('pointermove',e=>{
- if(!start||!temp||tool==='select')return;
- const p=point(e);
- if(tool==='ellipse'){
-  temp.setAttribute('cx',(start.x+p.x)/2);
-  temp.setAttribute('cy',(start.y+p.y)/2);
-  temp.setAttribute('rx',Math.abs(p.x-start.x)/2);
-  temp.setAttribute('ry',Math.abs(p.y-start.y)/2);
- }else if(tool==='line'){
-  temp.setAttribute('x2',p.x);
-  temp.setAttribute('y2',p.y);
- }
-});
-svg.addEventListener('pointerup',()=>{
- start=null;temp=null;
-});
-
-document.getElementById('undo').onclick=()=>{
- if(history.length){
-  art.innerHTML=history.pop();
- }
-};
-document.getElementById('clear').onclick=()=>{
- if(confirm('Clear your whole design?')){
-  snapshot();art.innerHTML='';
- }
-};
-document.getElementById('grid').onclick=()=>{
- grid=!grid;
- gridbg.setAttribute('opacity',grid?'1':'0');
- document.getElementById('grid').textContent=
- grid?'Grid: ON':'Grid: OFF';
-};
-document.getElementById('save').onclick=()=>{
- const clone=svg.cloneNode(true);
- clone.setAttribute('xmlns','http://www.w3.org/2000/svg');
- const bg=clone.querySelector('#gridbg');
- if(bg)bg.remove();
- const xml=new XMLSerializer().serializeToString(clone);
- const blob=new Blob([xml],{type:'image/svg+xml;charset=utf-8'});
- const url=URL.createObjectURL(blob);
- const a=document.createElement('a');
- a.href=url;a.download='Coral-Jewellery-Design.svg';
- a.click();
- setTimeout(()=>URL.revokeObjectURL(url),1000);
-};
+function filter(m){mode=m;draw()}
+function rotate(deg){rotation=(rotation+deg+360)%360;draw()}
+function resetImage(){rotation=0;mode='original';measurement='';document.getElementById('bright').value=100;document.getElementById('cont').value=100;draw()}
+function addMeasure(){measurement=document.getElementById('measure').value.trim();draw()}
+function clearMeasure(){measurement='';draw()}
+function savePNG(){
+ if(!source)return alert('First upload a design.');
+ const a=document.createElement('a');a.download='jewellery-design.png';a.href=canvas.toDataURL('image/png');a.click();
+}
+function saveSVG(){
+ if(!source)return alert('First upload a design.');
+ const png=canvas.toDataURL('image/png');
+ const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${canvas.width}" height="${canvas.height}" viewBox="0 0 ${canvas.width} ${canvas.height}"><image href="${png}" width="${canvas.width}" height="${canvas.height}"/></svg>`;
+ const blob=new Blob([svg],{type:'image/svg+xml;charset=utf-8'});
+ const url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download='jewellery-design.svg';a.click();URL.revokeObjectURL(url);
+}
 </script>
 </body>
-  </html>
-  
+</html>
