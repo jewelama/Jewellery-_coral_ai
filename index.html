@@ -1,158 +1,302 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Jewellery Coral AI</title>
+<title>Jewellery Coral AI V2</title>
 <style>
+:root{--bg:#10131a;--panel:#1b202a;--gold:#e6bd77;--line:#363e4b}
 *{box-sizing:border-box}
-body{margin:0;background:#10131a;color:#f4f4f5;font-family:Arial,sans-serif}
-header{padding:18px;background:#202631;text-align:center;border-bottom:2px solid #c9a66b}
-h1{font-size:24px;margin:0;color:#f2ce8b}
-header p{margin:8px 0 0;color:#c8ced8}
-main{padding:14px;max-width:950px;margin:auto}
-.panel{background:#1b202a;padding:15px;border-radius:14px;margin-bottom:14px;border:1px solid #343c49}
-h2{font-size:18px;margin:0 0 13px}
-.row{display:flex;flex-wrap:wrap;gap:9px;margin:10px 0}
-button,.upload{border:0;border-radius:9px;padding:12px 14px;background:#bd9556;color:#111;font-weight:bold;font-size:14px;cursor:pointer}
-button.secondary{background:#303948;color:white}
-input[type=file]{max-width:100%;color:white}
-input[type=number],input[type=text]{padding:10px;border-radius:7px;border:1px solid #596272;background:#10131a;color:white;max-width:100%;width:100%}
-label{font-size:13px;color:#cbd0d8;display:block;margin:9px 0}
-#stage{background:#f8f8f5;border-radius:10px;min-height:260px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
-#art{max-width:100%;max-height:65vh;display:block}
-#hint{color:#555;text-align:center;padding:35px}
-.small{font-size:12px;color:#adb5c2;line-height:1.5}
-#status{color:#f2ce8b;font-size:13px}
+body{margin:0;background:var(--bg);color:#f6f7fb;font-family:Arial,sans-serif}
+header{background:#1c222d;padding:17px 12px;text-align:center;border-bottom:2px solid var(--gold)}
+header h1{font-size:23px;margin:0;color:var(--gold)}
+header p{font-size:12px;color:#c5cbd6;margin:8px 0 0}
+main{width:100%;max-width:950px;margin:auto;padding:12px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:14px;margin-bottom:13px}
+h2{font-size:17px;margin:0 0 13px}
+p{line-height:1.5}
+.small{font-size:12px;color:#bac2ce;line-height:1.6}
+input,button,select{font:inherit}
+input[type=file]{width:100%;font-size:13px;color:#eee}
+input[type=range]{width:100%;accent-color:var(--gold)}
+label{display:block;font-size:13px;margin:13px 0 7px;color:#dce0e8}
+button{border:0;border-radius:9px;padding:12px 13px;background:var(--gold);color:#171717;font-weight:bold;cursor:pointer}
+button.secondary{background:#303948;color:#fff}
+button:disabled{opacity:.4}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.row button{flex:1}
+.tabs{display:flex;gap:8px;margin-bottom:12px}
+.tabs button{flex:1}
+.tabs button.active{outline:2px solid var(--gold)}
+.preview{background:#f7f7f4;border-radius:9px;min-height:230px;display:flex;align-items:center;justify-content:center;overflow:auto}
+.preview canvas{display:block;width:100%;height:auto;max-height:65vh;object-fit:contain}
+#empty{padding:30px;color:#555;text-align:center}
+.status{font-size:13px;color:var(--gold);overflow-wrap:anywhere}
+input[type=number]{width:100%;padding:10px;border-radius:7px;background:#10131a;color:white;border:1px solid #505969}
 </style>
 </head>
 <body>
 <header>
-<h1>✦ Jewellery Coral AI ✦</h1>
-<p>Jewellery Design Helper • CorelDRAW Workflow</p>
+<h1>✦ Jewellery Coral AI V2 ✦</h1>
+<p>Photo to Outline • Jewellery Design Helper</p>
 </header>
+
 <main>
 <section class="panel">
-<h2>STEP 1 — Upload Design</h2>
-<input id="file" type="file" accept="image/*">
-<div class="row">
-<button class="secondary" onclick="rotate(-90)">↶ Rotate</button>
-<button class="secondary" onclick="rotate(90)">↷ Rotate</button>
-<button class="secondary" onclick="resetImage()">Reset</button>
-</div>
-<p class="small">अपनी jewellery की फोटो या sketch चुनें। बेहतर नतीजे के लिए साफ फोटो इस्तेमाल करें।</p>
+<h2>STEP 1 — Upload Jewellery Photo</h2>
+<input type="file" id="upload" accept="image/*">
+<p class="small">साफ फोटो चुनें। सफेद या plain background और jewellery के आसपास अच्छी रोशनी होने पर outline बेहतर मिल सकती है।</p>
 </section>
 
 <section class="panel">
-<h2>STEP 2 — Sketch Tools</h2>
+<h2>STEP 2 — Extract Outline</h2>
+<label>Edge Sensitivity: <span id="thresholdText">65</span></label>
+<input id="threshold" type="range" min="10" max="180" value="65">
+<p class="small">Sensitivity कम करने पर ज्यादा किनारे मिल सकते हैं। बढ़ाने पर कमजोर किनारे हट सकते हैं।</p>
+
+<label>Line Thickness: <span id="thickText">1</span> px</label>
+<input id="thickness" type="range" min="1" max="5" value="1">
+
+<label>Background</label>
+<select id="background" style="width:100%;padding:10px;border-radius:8px;background:#10131a;color:white">
+<option value="white">White background</option>
+<option value="black">Black background</option>
+<option value="transparent">Transparent background</option>
+</select>
+
 <div class="row">
-<button onclick="filter('original')">Original</button>
-<button onclick="filter('gray')">Black & White</button>
-<button onclick="filter('contrast')">Sharp Contrast</button>
-<button onclick="filter('invert')">Invert</button>
+<button id="extract">Extract Outline</button>
+<button id="reset" class="secondary">Reset</button>
 </div>
-<label>Brightness <input id="bright" type="range" min="50" max="160" value="100" oninput="draw()"></label>
-<label>Contrast <input id="cont" type="range" min="50" max="220" value="100" oninput="draw()"></label>
 </section>
 
 <section class="panel">
-<h2>STEP 3 — Measurements</h2>
-<label>Measurement text (उदाहरण: Width 25 mm)
-<input id="measure" type="text" value="Width 25 mm"></label>
-<div class="row">
-<button onclick="addMeasure()">Add Measurement</button>
-<button class="secondary" onclick="clearMeasure()">Clear Measurement</button>
+<h2>STEP 3 — Preview</h2>
+<div class="tabs">
+<button id="originalTab" class="secondary">Original Photo</button>
+<button id="outlineTab" class="active">Outline</button>
 </div>
-<p class="small">Measurement text केवल annotation है; फोटो के scale से स्वतः वास्तविक माप नहीं निकलता।</p>
+<div class="preview">
+<div id="empty">अपनी jewellery की फोटो अपलोड करें।</div>
+<canvas id="preview" hidden></canvas>
+</div>
+<p id="status" class="status">Ready — upload a photo to begin.</p>
 </section>
 
 <section class="panel">
-<h2>Design Preview</h2>
-<div id="stage">
-<div id="hint">Upload a jewellery image to start</div>
-<canvas id="art" hidden></canvas>
-</div>
-<p id="status">Ready — upload your design.</p>
-</section>
-
-<section class="panel">
-<h2>STEP 4 — Export for CorelDRAW</h2>
+<h2>STEP 4 — Export to CorelDRAW</h2>
 <div class="row">
-<button onclick="savePNG()">Download PNG</button>
-<button onclick="saveSVG()">Download SVG</button>
+<button id="pngBtn" disabled>Download Outline PNG</button>
+<button id="svgBtn" disabled>Download Outline SVG</button>
 </div>
-<p class="small">PNG एक raster image है। SVG में यह preview image embedded होगी; यह अपने-आप असली editable vector curves नहीं बनाती। SVG को CorelDRAW में import करके आगे काम करें।</p>
+<p class="small">SVG में निकाले गए edge pixels को vector paths में बदला जाएगा। बहुत बारीक या टूटे हुए किनारों को CorelDRAW में सुधारना पड़ सकता है। यह CAD-grade jewellery geometry नहीं है।</p>
 </section>
 </main>
+
 <script>
-const canvas=document.getElementById('art');
-const ctx=canvas.getContext('2d');
-let source=null,rotation=0,mode='original',measurement='';
-function draw(){
- if(!source)return;
- const max=1000,scale=Math.min(1,max/source.width,max/source.height);
- const w=Math.max(1,Math.round(source.width*scale));
- const h=Math.max(1,Math.round(source.height*scale));
- const sideways=Math.abs(rotation%180)===90;
- canvas.width=sideways?h:w;canvas.height=sideways?w:h;
- ctx.save();ctx.translate(canvas.width/2,canvas.height/2);
- ctx.rotate(rotation*Math.PI/180);
- ctx.drawImage(source,-w/2,-h/2,w,h);ctx.restore();
- const image=ctx.getImageData(0,0,canvas.width,canvas.height);
- const d=image.data,brightness=+document.getElementById('bright').value;
- const contrast=+document.getElementById('cont').value/100;
- for(let i=0;i<d.length;i+=4){
-  let r=d[i],g=d[i+1],b=d[i+2];
-  if(mode==='gray'||mode==='contrast'){
-   let y=.299*r+.587*g+.114*b;
-   if(mode==='contrast')y=y<155?0:255;
-   r=g=b=y;
-  }else if(mode==='invert'){r=255-r;g=255-g;b=255-b}
-  d[i]=Math.max(0,Math.min(255,((r-128)*contrast+128)*brightness/100));
-  d[i+1]=Math.max(0,Math.min(255,((g-128)*contrast+128)*brightness/100));
-  d[i+2]=Math.max(0,Math.min(255,((b-128)*contrast+128)*brightness/100));
- }
- ctx.putImageData(image,0,0);
- if(measurement){
-  ctx.save();ctx.font='bold 20px Arial';
-  const pad=9,tw=ctx.measureText(measurement).width;
-  ctx.fillStyle='rgba(255,255,255,.88)';
-  ctx.fillRect(8,8,tw+pad*2,36);
-  ctx.fillStyle='#b17a25';ctx.fillText(measurement,8+pad,33);
-  ctx.restore();
- }
- canvas.hidden=false;document.getElementById('hint').hidden=true;
+(function(){
+const upload=document.getElementById('upload');
+const threshold=document.getElementById('threshold');
+const thickness=document.getElementById('thickness');
+const background=document.getElementById('background');
+const canvas=document.getElementById('preview');
+const ctx=canvas.getContext('2d',{willReadFrequently:true});
+const empty=document.getElementById('empty');
+const status=document.getElementById('status');
+let img=null,originalCanvas=null,edgeData=null,view='outline';
+
+function say(t){status.textContent=t}
+function setButtons(on){
+ document.getElementById('pngBtn').disabled=!on;
+ document.getElementById('svgBtn').disabled=!on;
 }
-document.getElementById('file').addEventListener('change',e=>{
- const f=e.target.files[0];if(!f)return;
- if(!f.type.startsWith('image/')){alert('Please select an image.');return}
+function getBackground(){
+ return background.value;
+}
+function paintBackground(c,w,h){
+ if(getBackground()==='black'){
+  c.fillStyle='#000';c.fillRect(0,0,w,h);
+ }else if(getBackground()==='white'){
+  c.fillStyle='#fff';c.fillRect(0,0,w,h);
+ }
+}
+function showCanvas(){
+ canvas.hidden=false;empty.hidden=true;
+}
+function loadImage(file){
+ if(!file)return;
+ if(!file.type.startsWith('image/')){
+  say('कृपया image file चुनें।');return;
+ }
  const reader=new FileReader();
- reader.onload=()=>{
-  const img=new Image();
-  img.onload=()=>{source=img;rotation=0;mode='original';measurement='';draw();document.getElementById('status').textContent='Image loaded successfully.'};
-  img.onerror=()=>alert('Image could not be opened.');
-  img.src=reader.result;
+ reader.onload=function(){
+  const image=new Image();
+  image.onload=function(){
+   img=image;
+   const scale=Math.min(1,1200/image.width,1200/image.height);
+   const w=Math.max(1,Math.round(image.width*scale));
+   const h=Math.max(1,Math.round(image.height*scale));
+   originalCanvas=document.createElement('canvas');
+   originalCanvas.width=w;originalCanvas.height=h;
+   originalCanvas.getContext('2d').drawImage(image,0,0,w,h);
+   edgeData=null;view='original';
+   renderOriginal();
+   setButtons(false);
+   document.getElementById('originalTab').classList.add('active');
+   document.getElementById('outlineTab').classList.remove('active');
+   say('Photo loaded. अब Extract Outline दबाएँ।');
+  };
+  image.onerror=()=>say('फोटो खुल नहीं पाई। दूसरी image चुनें।');
+  image.src=reader.result;
  };
- reader.readAsDataURL(f);
-});
-function filter(m){mode=m;draw()}
-function rotate(deg){rotation=(rotation+deg+360)%360;draw()}
-function resetImage(){rotation=0;mode='original';measurement='';document.getElementById('bright').value=100;document.getElementById('cont').value=100;draw()}
-function addMeasure(){measurement=document.getElementById('measure').value.trim();draw()}
-function clearMeasure(){measurement='';draw()}
+ reader.readAsDataURL(file);
+}
+function renderOriginal(){
+ if(!originalCanvas)return;
+ canvas.width=originalCanvas.width;
+ canvas.height=originalCanvas.height;
+ ctx.clearRect(0,0,canvas.width,canvas.height);
+ ctx.drawImage(originalCanvas,0,0);
+ showCanvas();
+}
+function extract(){
+ if(!originalCanvas){say('पहले jewellery की फोटो upload करें।');return}
+ const w=originalCanvas.width,h=originalCanvas.height;
+ const oc=originalCanvas.getContext('2d');
+ const data=oc.getImageData(0,0,w,h).data;
+ const gray=new Float32Array(w*h);
+ for(let i=0,j=0;i<data.length;i+=4,j++){
+  gray[j]=.299*data[i]+.587*data[i+1]+.114*data[i+2];
+ }
+ const edges=new Uint8Array(w*h);
+ const t=Number(threshold.value);
+ for(let y=1;y<h-1;y++){
+  for(let x=1;x<w-1;x++){
+   const i=y*w+x;
+   const gx=-gray[i-w-1]+gray[i-w+1]
+     -2*gray[i-1]+2*gray[i+1]
+     -gray[i+w-1]+gray[i+w+1];
+   const gy=-gray[i-w-1]-2*gray[i-w]-gray[i-w+1]
+     +gray[i+w-1]+2*gray[i+w]+gray[i+w+1];
+   if(Math.sqrt(gx*gx+gy*gy)>=t)edges[i]=1;
+  }
+ }
+ edgeData={w,h,edges};
+ renderOutline();
+ setButtons(true);
+ view='outline';
+ document.getElementById('originalTab').classList.remove('active');
+ document.getElementById('outlineTab').classList.add('active');
+ say('Outline तैयार है। Sensitivity बदलकर फिर Extract Outline दबा सकते हैं।');
+}
+function renderOutline(){
+ if(!edgeData)return;
+ const {w,h,edges}=edgeData;
+ canvas.width=w;canvas.height=h;
+ ctx.clearRect(0,0,w,h);
+ paintBackground(ctx,w,h);
+ const pixels=ctx.createImageData(w,h);
+ const thick=Number(thickness.value);
+ for(let y=1;y<h-1;y++){
+  for(let x=1;x<w-1;x++){
+   const i=y*w+x;
+   if(!edges[i])continue;
+   for(let dy=-(thick-1);dy<=thick-1;dy++){
+    for(let dx=-(thick-1);dx<=thick-1;dx++){
+     if(dx*dx+dy*dy>(thick-1)*(thick-1))continue;
+     const xx=x+dx,yy=y+dy;
+     if(xx<0||yy<0||xx>=w||yy>=h)continue;
+     const p=(yy*w+xx)*4;
+     pixels.data[p]=getBackground()==='black'?255:0;
+     pixels.data[p+1]=getBackground()==='black'?255:0;
+     pixels.data[p+2]=getBackground()==='black'?255:0;
+     pixels.data[p+3]=255;
+    }
+   }
+  }
+ }
+ ctx.putImageData(pixels,0,0);
+ showCanvas();
+}
+function updateView(){
+ if(view==='original')renderOriginal();
+ else if(edgeData)renderOutline();
+}
+function download(name,blob){
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement('a');
+ a.href=url;a.download=name;
+ document.body.appendChild(a);a.click();a.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),1500);
+}
 function savePNG(){
- if(!source)return alert('First upload a design.');
- const a=document.createElement('a');a.download='jewellery-design.png';a.href=canvas.toDataURL('image/png');a.click();
+ if(!edgeData)return;
+ const out=document.createElement('canvas');
+ out.width=edgeData.w;out.height=edgeData.h;
+ const ox=out.getContext('2d');
+ ox.drawImage(canvas,0,0);
+ if(view!=='outline')renderOutline();
+ out.getContext('2d').drawImage(canvas,0,0);
+ out.toBlob(b=>{if(b)download('jewellery-outline.png',b)},'image/png');
 }
 function saveSVG(){
- if(!source)return alert('First upload a design.');
- const png=canvas.toDataURL('image/png');
- const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${canvas.width}" height="${canvas.height}" viewBox="0 0 ${canvas.width} ${canvas.height}"><image href="${png}" width="${canvas.width}" height="${canvas.height}"/></svg>`;
- const blob=new Blob([svg],{type:'image/svg+xml;charset=utf-8'});
- const url=URL.createObjectURL(blob),a=document.createElement('a');
- a.href=url;a.download='jewellery-design.svg';a.click();URL.revokeObjectURL(url);
+ if(!edgeData)return;
+ const {w,h,edges}=edgeData;
+ const black=getBackground()==='black';
+ const color=black?'#ffffff':'#000000';
+ let paths='';
+ // Convert contiguous horizontal edge runs into vector path segments.
+ for(let y=1;y<h-1;y++){
+  let x=1;
+  while(x<w-1){
+   if(!edges[y*w+x]){x++;continue}
+   const start=x;
+   while(x<w-1&&edges[y*w+x])x++;
+   paths+='M'+start+' '+y+'H'+(x-1);
+  }
+ }
+ const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+w+
+ '" height="'+h+'" viewBox="0 0 '+w+' '+h+'">'+
+ (getBackground()==='transparent'?'':'<rect width="100%" height="100%" fill="'+(black?'black':'white')+'"/>')+
+ '<path d="'+paths+'" fill="none" stroke="'+color+
+ '" stroke-width="'+Number(thickness.value)+'" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+ download('jewellery-outline.svg',new Blob([svg],{type:'image/svg+xml;charset=utf-8'}));
 }
+upload.addEventListener('change',e=>loadImage(e.target.files[0]));
+document.getElementById('extract').addEventListener('click',extract);
+document.getElementById('reset').addEventListener('click',()=>{
+ if(!originalCanvas)return;
+ edgeData=null;view='original';renderOriginal();setButtons(false);
+ say('Reset complete. Extract Outline दबाकर फिर से शुरू करें।');
+});
+threshold.addEventListener('input',()=>{
+ document.getElementById('thresholdText').textContent=threshold.value;
+});
+thickness.addEventListener('input',()=>{
+ document.getElementById('thickText').textContent=thickness.value;
+ updateView();
+});
+background.addEventListener('change',updateView);
+document.getElementById('originalTab').addEventListener('click',()=>{
+ if(!originalCanvas)return;
+ view='original';renderOriginal();
+ document.getElementById('originalTab').classList.add('active');
+ document.getElementById('outlineTab').classList.remove('active');
+});
+document.getElementById('outlineTab').addEventListener('click',()=>{
+ if(!edgeData)return;
+ view='outline';renderOutline();
+ document.getElementById('outlineTab').classList.add('active');
+ document.getElementById('originalTab').classList.remove('active');
+});
+document.getElementById('pngBtn').addEventListener('click',()=>{
+ if(!edgeData)return;
+ const previous=view;view='outline';renderOutline();savePNG();
+ view=previous;updateView();
+});
+document.getElementById('svgBtn').addEventListener('click',saveSVG);
+})();
 </script>
 </body>
 </html>
