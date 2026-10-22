@@ -1,35 +1,242 @@
-<!doctype html>
-<html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Jewellery Coral AI - Smooth Vector 2D</title>
+
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jewellery Coral AI - Clean 2D</title>
 <style>
-:root{--bg:#10131a;--p:#1c212d;--g:#e9c078;--t:#f5f6fa;--m:#bdc3cf;--b:#3a4151}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:16px/1.45 system-ui,Arial}header,main,footer{max-width:900px;margin:auto;padding:18px}h1{font-size:25px;margin:0 0 5px}h2{font-size:21px;margin:0 0 14px}.muted,.hint{color:var(--m);font-size:14px}.card{background:var(--p);border:1px solid var(--b);border-radius:20px;padding:18px;margin-bottom:16px}label{display:block;margin:14px 0 6px;font-weight:650}.v{float:right;color:var(--g)}input[type=file],select,button{width:100%;padding:14px;border:1px solid #454d60;border-radius:13px;background:#10141d;color:var(--t);font:inherit}input[type=range]{width:100%;accent-color:var(--g)}button{font-weight:750;min-height:52px;cursor:pointer}.gold{background:var(--g);color:#171717;border-color:var(--g)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.preview{background:#fff;border-radius:14px;min-height:220px;margin-top:12px;overflow:auto;display:flex;justify-content:center;align-items:center}.preview img,.preview svg{width:100%;height:auto;max-height:70vh;object-fit:contain}.status{color:var(--g);margin-top:12px}.note{font-size:13px;color:var(--m)}@media(min-width:700px){.card{padding:22px}}
-</style></head><body>
-<header><h1>Jewellery Coral AI — Smooth Vector 2D</h1><div class="muted">CorelDRAW के लिए editable SVG outline</div></header>
+*{box-sizing:border-box}
+body{margin:0;background:#10131a;color:#f5f5f5;font-family:Arial,sans-serif}
+main{max-width:850px;margin:auto;padding:15px}
+.card{background:#1c212d;border:1px solid #3a4151;border-radius:18px;padding:16px;margin-bottom:16px}
+h1{font-size:25px}h2{font-size:21px}
+p{line-height:1.6;color:#e9c078}
+input,button,select{width:100%;padding:14px;margin:7px 0;border-radius:11px;font-size:16px}
+input,select,button{background:#10141d;color:white;border:1px solid #485064}
+input[type=range]{padding:0;accent-color:#e9c078}
+button{font-weight:bold;cursor:pointer}
+.gold{background:#e9c078;color:#171717;border:0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+#preview{background:white;min-height:280px;margin-top:12px;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:auto}
+#preview canvas{max-width:100%;height:auto;max-height:70vh;object-fit:contain}
+label{display:block;margin-top:12px}
+.small{font-size:13px;color:#c4c9d3}
+</style>
+</head>
+<body>
 <main>
-<section class="card"><h2>1. फोटो upload करें</h2><input id="file" type="file" accept="image/*"><p class="hint">ज्वेलरी को फोटो में बड़ा रखें। सादा बैकग्राउंड और अच्छी रोशनी से परिणाम बेहतर होगा।</p></section>
-<section class="card"><h2>2. Settings</h2>
-<label>Noise cleanup <span class="v" id="nv">12</span></label><input id="noise" type="range" min="0" max="80" value="12">
-<label>Line threshold <span class="v" id="tv">150</span></label><input id="th" type="range" min="50" max="230" value="150">
-<label>Soft blur <span class="v" id="bv">1</span></label><input id="blur" type="range" min="0" max="3" value="1">
-<label>Background</label><select id="bg"><option value="white">White background</option><option value="transparent">Transparent background</option></select>
-<button class="gold" id="make" style="margin-top:18px">MAKE SMOOTH FULL-DESIGN 2D</button><div id="status" class="status">पहले फोटो upload करें।</div></section>
-<section class="card"><h2>3. Preview</h2><div class="grid"><button id="orig">Original photo</button><button id="result">Vector result</button></div><div class="preview" id="preview"><span style="color:#555">फोटो यहाँ दिखेगी</span></div><div class="grid"><button id="png" disabled>Download PNG</button><button id="svg" disabled>Download SVG for CorelDRAW</button></div><p class="note">SVG को CorelDRAW में खोलकर curves edit करें। फोटो tracing से manufacturing-ready CAD अपने-आप नहीं बनता।</p></section>
-</main><footer class="muted">शुरुआत: Noise 8–15, Threshold 130–165 और Blur 1. छोटे स्टोन गायब हों तो Noise कम करें।</footer>
+<div class="card">
+<h1>Jewellery Coral AI — Clean 2D</h1>
+<p>Photo se full-design thin-line tracing</p>
+<label>1. Jewellery photo चुनें</label>
+<input type="file" id="photo" accept="image/*">
+<p class="small">साफ फोटो और plain background बेहतर परिणाम देते हैं।</p>
+</div>
+
+<div class="card">
+<h2>2. Settings</h2>
+<label>Noise cleanup: <span id="nv">12</span></label>
+<input id="noise" type="range" min="0" max="100" value="12">
+<label>Line threshold: <span id="tv">100</span></label>
+<input id="threshold" type="range" min="20" max="220" value="100">
+<label>Soft blur: <span id="bv">1</span></label>
+<input id="blur" type="range" min="0" max="3" value="1">
+<label>Background</label>
+<select id="bg">
+<option value="white">White background</option>
+<option value="transparent">Transparent background</option>
+</select>
+<button class="gold" id="make">MAKE FULL DESIGN 2D</button>
+<p id="status">पहले फोटो अपलोड करें।</p>
+</div>
+
+<div class="card">
+<h2>3. Preview</h2>
+<div class="grid">
+<button id="original">Original Photo</button>
+<button id="resultBtn">2D Result</button>
+</div>
+<div id="preview">फोटो यहाँ दिखेगी</div>
+<div class="grid">
+<button id="png" disabled>Download PNG</button>
+<button id="svg" disabled>Download SVG</button>
+</div>
+<p class="small">यह फोटो-ट्रेसिंग टूल है। इसे manufacturing-ready CAD न मानें।</p>
+</div>
+</main>
+
 <script>
-(()=>{const $=x=>document.getElementById(x);let img=null,srcCanvas=null,svgText='';['noise','th','blur'].forEach(id=>$(id).oninput=()=>$(id[0]==='n'?'nv':id==='th'?'tv':'bv').textContent=$(id).value);
-function msg(t){$('status').textContent=t}
-$('file').onchange=e=>{let f=e.target.files[0];if(!f)return;let im=new Image();im.onload=()=>{img=im;srcCanvas=document.createElement('canvas');let s=Math.min(1,1400/Math.max(im.width,im.height));srcCanvas.width=Math.round(im.width*s);srcCanvas.height=Math.round(im.height*s);srcCanvas.getContext('2d').drawImage(im,0,0,srcCanvas.width,srcCanvas.height);$('preview').innerHTML='';let p=document.createElement('img');p.src=im.src;$('preview').append(p);svgText='';$('svg').disabled=$('png').disabled=true;msg('फोटो तैयार है। अब MAKE SMOOTH FULL-DESIGN 2D दबाएँ।')};im.onerror=()=>msg('फोटो नहीं खुली—दूसरी JPG/PNG चुनें।');im.src=URL.createObjectURL(f)};
-function trace(){let c=srcCanvas,w=c.width,h=c.height,x=c.getContext('2d'),d=x.getImageData(0,0,w,h).data,g=new Float32Array(w*h);for(let i=0,j=0;i<d.length;i+=4,j++)g[j]=.299*d[i]+.587*d[i+1]+.114*d[i+2];
-let r=+$('blur').value;if(r){let a=new Float32Array(w*h),b=new Float32Array(w*h);for(let y=0;y<h;y++)for(let xx=0;xx<w;xx++){let sum=0,n=0;for(let k=-r;k<=r;k++){let q=Math.max(0,Math.min(w-1,xx+k));sum+=g[y*w+q];n++}a[y*w+xx]=sum/n}for(let y=0;y<h;y++)for(let xx=0;xx<w;xx++){let sum=0,n=0;for(let k=-r;k<=r;k++){let q=Math.max(0,Math.min(h-1,y+k));sum+=a[q*w+xx];n++}b[y*w+xx]=sum/n}g=b}
-let t=+$('th').value,m=new Uint8Array(w*h);for(let i=0;i<m.length;i++)m[i]=g[i]<t?1:0;
-// Remove small isolated dark components. Keep connected stone outlines intact.
-let seen=new Uint8Array(w*h),st=[],co=[],min=+$('noise').value;for(let i=0;i<m.length;i++){if(!m[i]||seen[i])continue;st.length=0;co.length=0;st.push(i);seen[i]=1;while(st.length){let q=st.pop();co.push(q);let xx=q%w,y=(q/w)|0;let ns=[];if(xx)ns.push(q-1);if(xx<w-1)ns.push(q+1);if(y)ns.push(q-w);if(y<h-1)ns.push(q+w);for(let z of ns)if(m[z]&&!seen[z]){seen[z]=1;st.push(z)}}if(co.length<min)for(let q of co)m[q]=0}
-let paths=[];for(let y=0;y<h;y++){let xx=0;while(xx<w){if(!m[y*w+xx]){xx++;continue}let a=xx;while(xx<w&&m[y*w+xx])xx++;paths.push(`M${a} ${y}h${xx-a}v1h-${xx-a}Z`)}}
-let bg=$('bg').value==='white'?`<rect width="${w}" height="${h}" fill="white"/>`:'';svgText=`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${bg}<g fill="#111" stroke="#111" stroke-width=".35" stroke-linejoin="round">${paths.join('')}</g></svg>`;
-$('preview').innerHTML=svgText;$('preview').style.background=$('bg').value==='white'?'white':'#eee';$('svg').disabled=$('png').disabled=false;msg('Vector तैयार है। जरूरत हो तो Threshold और Noise थोड़ा बदलकर दोबारा बनाएँ।');}
-$('make').onclick=()=>{if(!srcCanvas){msg('पहले फोटो upload करें।');return}try{msg('Processing…');setTimeout(()=>{try{trace()}catch(e){console.error(e);msg('इस फोटो को process नहीं कर पाए।')}},20)}catch(e){msg('फोटो process नहीं हो पाई।')}};
-$('orig').onclick=()=>{if(!img){msg('पहले फोटो upload करें।');return}$('preview').innerHTML='';let p=document.createElement('img');p.src=img.src;$('preview').append(p);$('preview').style.background='white'};
-$('result').onclick=()=>{if(svgText){$('preview').innerHTML=svgText;$('preview').style.background=$('bg').value==='white'?'white':'#eee'}else msg('पहले vector result बनाएँ।')};
-$('svg').onclick=()=>{if(!svgText)return;let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([svgText],{type:'image/svg+xml'}));a.download='jewellery-full-design.svg';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500)};
-$('png').onclick=()=>{if(!svgText)return;let u=URL.createObjectURL(new Blob([svgText],{type:'image/svg+xml'})),im=new Image();im.onload=()=>{let c=document.createElement('canvas');c.width=srcCanvas.width*2;c.height=srcCanvas.height*2;let q=c.getContext('2d');if($('bg').value==='white'){q.fillStyle='white';q.fillRect(0,0,c.width,c.height)}q.drawImage(im,0,0,c.width,c.height);let a=document.createElement('a');a.href=c.toDataURL('image/png');a.download='jewellery-full-design.png';a.click();URL.revokeObjectURL(u)};im.src=u};
+(function(){
+const $=id=>document.getElementById(id);
+let sourceCanvas=null, resultCanvas=null, svgData='';
+
+['noise','threshold','blur'].forEach(id=>{
+ $(id).addEventListener('input',()=>{
+  const label={noise:'nv',threshold:'tv',blur:'bv'}[id];
+  $(label).textContent=$(id).value;
+ });
+});
+
+function message(t){$('status').textContent=t}
+
+function show(c){
+ $('preview').replaceChildren(c);
+ $('preview').style.background=$('bg').value==='white'?'white':'#eee';
+}
+
+$('photo').addEventListener('change',function(){
+ const f=this.files&&this.files[0];
+ if(!f)return;
+ const url=URL.createObjectURL(f),img=new Image();
+ img.onload=function(){
+  const scale=Math.min(1,1000/Math.max(img.naturalWidth,img.naturalHeight));
+  sourceCanvas=document.createElement('canvas');
+  sourceCanvas.width=Math.max(1,Math.round(img.naturalWidth*scale));
+  sourceCanvas.height=Math.max(1,Math.round(img.naturalHeight*scale));
+  sourceCanvas.getContext('2d').drawImage(img,0,0,sourceCanvas.width,sourceCanvas.height);
+  resultCanvas=null;svgData='';
+  $('png').disabled=true;$('svg').disabled=true;
+  show(sourceCanvas);
+  message('फोटो लोड हो गई। अब MAKE FULL DESIGN 2D दबाएँ।');
+  URL.revokeObjectURL(url);
+ };
+ img.onerror=function(){
+  message('फोटो नहीं खुली। JPG या PNG चुनें।');
+  URL.revokeObjectURL(url);
+ };
+ img.src=url;
+});
+
+function createResult(){
+ const w=sourceCanvas.width,h=sourceCanvas.height;
+ const ctx=sourceCanvas.getContext('2d');
+ const raw=ctx.getImageData(0,0,w,h).data;
+ const gray=new Float32Array(w*h);
+
+ for(let p=0;p<w*h;p++){
+  const i=p*4;
+  gray[p]=.299*raw[i]+.587*raw[i+1]+.114*raw[i+2];
+ }
+
+ // Blur to reduce paper grain and camera noise.
+ const r=Number($('blur').value);
+ let sm=gray;
+ if(r>0){
+  let a=new Float32Array(w*h),b=new Float32Array(w*h);
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+   let s=0,n=0;
+   for(let k=-r;k<=r;k++){
+    const xx=Math.max(0,Math.min(w-1,x+k));
+    s+=gray[y*w+xx];n++;
+   }
+   a[y*w+x]=s/n;
+  }
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+   let s=0,n=0;
+   for(let k=-r;k<=r;k++){
+    const yy=Math.max(0,Math.min(h-1,y+k));
+    s+=a[yy*w+x];n++;
+   }
+   b[y*w+x]=s/n;
+  }
+  sm=b;
+ }
+
+ // Sobel edge detection: trace complete design, not only dark pixels.
+ const edge=new Uint8Array(w*h);
+ const threshold=Number($('threshold').value);
+ for(let y=1;y<h-1;y++)for(let x=1;x<w-1;x++){
+  const p=y*w+x;
+  const gx=-sm[p-w-1]+sm[p-w+1]-2*sm[p-1]+2*sm[p+1]-sm[p+w-1]+sm[p+w+1];
+  const gy=-sm[p-w-1]-2*sm[p-w]-sm[p-w+1]+sm[p+w-1]+2*sm[p+w]+sm[p+w+1];
+  const mag=Math.sqrt(gx*gx+gy*gy);
+  if(mag>threshold)edge[p]=1;
+ }
+
+ // Remove isolated noise pixels, preserving connected fine detail.
+ const clean=new Uint8Array(edge);
+ const noise=Number($('noise').value);
+ for(let y=1;y<h-1;y++)for(let x=1;x<w-1;x++){
+  const p=y*w+x;
+  if(!edge[p])continue;
+  let count=0;
+  for(let yy=-1;yy<=1;yy++)for(let xx=-1;xx<=1;xx++){
+   if(xx||yy)count+=edge[p+yy*w+xx];
+  }
+  if(count<Math.max(1,Math.min(7,Math.round(noise/15))))clean[p]=0;
+ }
+
+ resultCanvas=document.createElement('canvas');
+ resultCanvas.width=w;resultCanvas.height=h;
+ const out=resultCanvas.getContext('2d');
+ const im=out.createImageData(w,h);
+ const transparent=$('bg').value==='transparent';
+ for(let p=0;p<w*h;p++){
+  const i=p*4;
+  if(clean[p]){
+   im.data[i]=20;im.data[i+1]=20;im.data[i+2]=20;im.data[i+3]=255;
+  }else{
+   im.data[i]=255;im.data[i+1]=255;im.data[i+2]=255;
+   im.data[i+3]=transparent?0:255;
+  }
+ }
+ out.putImageData(im,0,0);
+
+ // SVG path output using edge pixels. SVG stays editable in CorelDRAW.
+ const maxW=Math.min(w,700),maxH=Math.max(1,Math.round(h*maxW/w));
+ const small=document.createElement('canvas');
+ small.width=maxW;small.height=maxH;
+ small.getContext('2d').drawImage(resultCanvas,0,0,maxW,maxH);
+ const pix=small.getContext('2d').getImageData(0,0,maxW,maxH).data;
+ const paths=[];
+ for(let y=0;y<maxH;y++){
+  let x=0;
+  while(x<maxW){
+   if(pix[(y*maxW+x)*4]>100){x++;continue}
+   const start=x;
+   while(x<maxW&&pix[(y*maxW+x)*4]<=100)x++;
+   paths.push('M'+start+' '+y+'h'+(x-start));
+  }
+ }
+ const background=transparent?'':'<rect width="100%" height="100%" fill="white"/>';
+ svgData='<svg xmlns="http://www.w3.org/2000/svg" width="'+maxW+'" height="'+maxH+'" viewBox="0 0 '+maxW+' '+maxH+'">'+background+'<path d="'+paths.join(' ')+'" fill="none" stroke="#111" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+ show(resultCanvas);
+ $('png').disabled=false;$('svg').disabled=false;
+ message('2D result तैयार है। अगर लाइनें कम हैं तो threshold घटाएँ; noise हो तो blur या noise cleanup थोड़ा बढ़ाएँ।');
+}
+
+$('make').addEventListener('click',()=>{
+ if(!sourceCanvas){message('पहले फोटो upload करें।');return}
+ message('Processing…');
+ setTimeout(()=>{
+  try{createResult()}
+  catch(e){console.error(e);message('त्रुटि हुई। फोटो फिर से upload करके कोशिश करें।')}
+ },30);
+});
+
+$('original').addEventListener('click',()=>{
+ if(sourceCanvas)show(sourceCanvas);else message('पहले फोटो upload करें।');
+});
+$('resultBtn').addEventListener('click',()=>{
+ if(resultCanvas)show(resultCanvas);else message('पहले MAKE FULL DESIGN 2D दबाएँ।');
+});
+$('bg').addEventListener('change',()=>{
+ if(sourceCanvas&&resultCanvas)createResult();
+});
+$('png').addEventListener('click',()=>{
+ if(!resultCanvas)return;
+ const a=document.createElement('a');
+ a.href=resultCanvas.toDataURL('image/png');a.download='jewellery-full-design-2d.png';a.click();
+});
+$('svg').addEventListener('click',()=>{
+ if(!svgData)return;
+ const url=URL.createObjectURL(new Blob([svgData],{type:'image/svg+xml'}));
+ const a=document.createElement('a');a.href=url;a.download='jewellery-full-design-2d.svg';a.click();
+ setTimeout(()=>URL.revokeObjectURL(url),1500);
+});
 })();
-</script></body></html>
+</script>
+</body>
+</html>
